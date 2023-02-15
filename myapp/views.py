@@ -1,14 +1,18 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from .models import Project, Task
-from django.shortcuts import get_object_or_404
+from .form import CreateNewTask
+
 
 # Create your views here.
 
 
 def hello(request):
-    print(id)
-    return HttpResponse("<h2>Hello les devs </h2>")
+    title = "Hello les devs 1"
+    return render(request, "index.html", {
+        "title": title
+    })
+    # return HttpResponse("<h2>Hello les devs </h2>")
 
 
 def project(request, id):
@@ -16,14 +20,38 @@ def project(request, id):
     return JsonResponse("Project %s" % project, safe=False)
 
 
-# def project(request, id):
-#     project = list(Project.objects.values())
+def project(request):
+    projects = Project.objects.all()
 
-#     return JsonResponse(project, safe=False)
+    return render(request, "projects.html", {
+        "projects": projects
+    })
+
+    # project = list(Project.objects.values())
+
+    # return JsonResponse(project, safe=False)
 
 
-def task(request, id):
-    # task = Task.objects.get(id=id)
-    task = get_object_or_404(Task, id=id)
+def task(request):
+    task = Task.objects.all()
 
-    return HttpResponse("Task %s" % task.title)
+    return render(request, "tasks.html", {
+        "tasks": task
+    })
+
+
+def create_task(request):
+    if request.method == "GET":
+        # Show interface
+        return render(request, "create_task.html", {
+            "form": CreateNewTask()
+        })
+
+        # Save data in bdd
+    else:
+        Task.objects.create(
+            title=request.POST["title"],
+            description=request.POST["description"],
+            project_id=1
+        )
+        return redirect("tasks")
